@@ -1,18 +1,47 @@
-const passwords = {
-  wifi: 123,
-  mac: "mac321"
-};
+const fs = require("fs");
 
-function get(key) {
+const passwordFileName = ".passwords.json";
+
+function readPasswords() {
+  return new Promise(resolve => {
+    fs.readFile(passwordFileName, "utf-8", (error, passwordJSON) => {
+      if (error) {
+        return resolve({});
+      }
+      try {
+        const passwords = JSON.parse(passwordJSON);
+        resolve(passwords);
+      } catch (error) {
+        console.error(`Invalid ${passwordFileName}`);
+        resolve({});
+      }
+    });
+  });
+}
+
+function writePasswords(passwords) {
+  fs.writeFile(passwordFileName, JSON.stringify(passwords, null, 2), error => {
+    if (error) {
+      console.error(error);
+    }
+  });
+}
+
+async function get(key) {
+  const passwords = await readPasswords();
   return passwords[key];
 }
 
-function set(key, value) {
+async function set(key, value) {
+  const passwords = await readPasswords();
   passwords[key] = value;
+  writePasswords(passwords);
 }
 
-function unset(key) {
+async function unset(key) {
+  const passwords = await readPasswords();
   delete passwords[key];
+  writePasswords(passwords);
 }
 
 // module.exports = {

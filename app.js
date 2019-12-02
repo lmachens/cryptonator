@@ -3,22 +3,26 @@ const { get, set, unset } = require("./utils/cmds");
 const userArgs = process.argv.slice(2);
 const [cmd, key, value] = userArgs;
 
-switch (cmd) {
-  case "get":
-    {
-      const result = get(key);
-      console.log(result);
-    }
-    break;
+async function execute() {
+  switch (cmd) {
+    case "get":
+      {
+        const result = await get(key);
+        console.log(result);
+      }
+      break;
 
-  case "set":
-    set(key, value);
-    break;
+    case "set":
+      await set(key, value);
+      break;
 
-  case "unset":
-    unset(key);
-    break;
+    case "unset":
+      await unset(key);
+      break;
 
-  default:
-    console.error("Unknown command");
+    default:
+      console.error("Unknown command");
+  }
 }
+
+execute();
