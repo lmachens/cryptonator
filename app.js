@@ -5,8 +5,10 @@ const [cmd, key, value] = userArgs;
 
 switch (cmd) {
   case "get":
-    const result = get(key);
-    console.log(result);
+    {
+      const result = get(key);
+      console.log(result);
+    }
     break;
 
   case "set":
