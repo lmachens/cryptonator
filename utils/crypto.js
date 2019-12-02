@@ -1,4 +1,6 @@
 const crypto = require("crypto");
+const fs = require("fs");
+
 let resizedIV = Buffer.allocUnsafe(16);
 const iv = crypto
   .createHash("sha256")
@@ -6,15 +8,21 @@ const iv = crypto
   .digest();
 iv.copy(resizedIV);
 
-function getMasterPassword(secret) {
+function readMasterPassword() {
+  return fs.readFileSync(".password", "utf-8");
+}
+
+function getMasterPassword() {
+  const masterPassword = readMasterPassword();
+
   return crypto
     .createHash("sha256")
-    .update(secret)
+    .update(masterPassword)
     .digest();
 }
 
 function encrypt(value) {
-  const masterPassword = getMasterPassword("SUPER_SECRET_PASSWORD");
+  const masterPassword = getMasterPassword();
 
   const cryptoCipher = crypto.createCipheriv(
     "aes256",
@@ -29,7 +37,7 @@ function encrypt(value) {
 }
 
 function decrypt(encryptedValue) {
-  const masterPassword = getMasterPassword("SUPER_SECRET_PASSWORD");
+  const masterPassword = getMasterPassword();
 
   const cryptoCipher = crypto.createDecipheriv(
     "aes256",
@@ -43,5 +51,26 @@ function decrypt(encryptedValue) {
   return decryptedValue;
 }
 
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 2048, 32, "sha512")
+    .toString("hex");
+
+  return [salt, hash].join("$");
+}
+
+function verifyHash(password, original) {
+  const [salt, originalHash] = original.split("$");
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 2048, 32, "sha512")
+    .toString("hex");
+
+  return hash === originalHash;
+}
+
 exports.encrypt = encrypt;
 exports.decrypt = decrypt;
+exports.hashPassword = hashPassword;
+exports.verifyHash = verifyHash;
+exports.readMasterPassword = readMasterPassword;

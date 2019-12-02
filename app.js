@@ -1,9 +1,15 @@
 const { get, set, unset } = require("./utils/cmds");
-
+const { verifyHash, readMasterPassword } = require("./utils/crypto");
 const userArgs = process.argv.slice(2);
-const [cmd, key, value] = userArgs;
+const [masterPassword, cmd, key, value] = userArgs;
 
 async function execute() {
+  const hash = readMasterPassword();
+
+  if (!verifyHash(masterPassword, hash)) {
+    throw new Error("Invalid master password");
+  }
+
   switch (cmd) {
     case "get":
       {
