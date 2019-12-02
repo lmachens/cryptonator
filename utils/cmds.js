@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { decrypt, encrypt } = require("./crypto");
 
 const passwordFileName = ".passwords.json";
 
@@ -29,12 +30,16 @@ function writePasswords(passwords) {
 
 async function get(key) {
   const passwords = await readPasswords();
-  return passwords[key];
+  const encryptedValue = passwords[key];
+  const value = decrypt(encryptedValue);
+  return value;
 }
 
 async function set(key, value) {
   const passwords = await readPasswords();
-  passwords[key] = value;
+  const encryptedValue = encrypt(value);
+  passwords[key] = encryptedValue;
+
   writePasswords(passwords);
 }
 
