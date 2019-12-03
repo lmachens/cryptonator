@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Cryptonator</title>
+  </head>
+  <body>
+    <h1>Cryptonator</h1>
+    <div>
+      <label>
+        Password
+        <input
+          type="text"
+          placeholder="Master password"
+          id="password"
+          value="1dc5b4c14ecb09bf4216369af97d2bc0$7ed39b5768615c7349320ccac561f1195ed1d8b440e5b34ee9506cbdfa34a861"
+        />
+      </label>
+      <label>
+        Key
+        <input type="text" placeholder="Key" id="key" />
+      </label>
+      <label>
+        Value
+        <input type="text" placeholder="Value" id="value" />
+      </label>
+    </div>
+    <div>
+      <button id="get">Get</button>
+      <button id="set">Set</button>
+      <button id="unset">Unset</button>
+    </div>
+    <script>
+      function getInput() {
+        const key = document.querySelector("#key").value;
+        const value = document.querySelector("#value").value;
+        const password = document.querySelector("#password").value;
+        return {
+          key,
+          value,
+          password
+        };
+      }
+
+      document.querySelector("#get").addEventListener("click", () => {
+        const input = getInput();
+        fetch(`/api/secrets/${input.key}`, {
+          headers: {
+            Authorization: input.password
+          }
+        })
+          .then(response => response.json())
+          .then(alert);
+      });
+      document.querySelector("#set").addEventListener("click", () => {
+        const input = getInput();
+        fetch(`/api/secrets/${input.key}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: input.password
+          },
+          body: JSON.stringify(input)
+        })
+          .then(response => response.json())
+          .then(alert);
+      });
+
+      document.querySelector("#unset").addEventListener("click", () => {
+        const input = getInput();
+        fetch(`/api/secrets/${input.key}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: input.password
+          }
+        })
+          .then(response => response.json())
+          .then(alert);
+      });
+    </script>
+  </body>
+</html>
