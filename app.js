@@ -1,33 +1,42 @@
 const { get, set, unset } = require("./utils/cmds");
 const { verifyHash, readMasterPassword } = require("./utils/crypto");
+const { askForPassword, waitFor } = require("./utils/input");
+
 const userArgs = process.argv.slice(2);
-const [masterPassword, cmd, key, value] = userArgs;
+const [cmd, key, value] = userArgs;
 
 async function execute() {
-  const hash = readMasterPassword();
+  try {
+    const hash = readMasterPassword();
+    const password = await askForPassword();
 
-  if (!verifyHash(masterPassword, hash)) {
-    throw new Error("Invalid master password");
-  }
+    await waitFor(1000);
 
-  switch (cmd) {
-    case "get":
-      {
-        const result = await get(key);
-        console.log(result);
-      }
-      break;
+    if (!verifyHash(password, hash)) {
+      throw new Error("Invalid master password");
+    }
 
-    case "set":
-      await set(key, value);
-      break;
+    switch (cmd) {
+      case "get":
+        {
+          const result = await get(key);
+          console.log(result);
+        }
+        break;
 
-    case "unset":
-      await unset(key);
-      break;
+      case "set":
+        await set(key, value);
+        break;
 
-    default:
-      console.error("Unknown command");
+      case "unset":
+        await unset(key);
+        break;
+
+      default:
+        console.error("Unknown command");
+    }
+  } catch (error) {
+    console.error("Oh no!", error);
   }
 }
 
